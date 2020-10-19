@@ -1,13 +1,31 @@
 import { Component, Prop, State, h } from '@stencil/core';
 import { sayHello } from '../../helpers/utils';
 
+var serializeForm = function (formData) {
+  var obj = {};
+  // var formData = new FormData(form);
+  for (var key of formData.keys()) {
+    obj[key] = formData.get(key);
+  }
+  return obj;
+};
+
 @Component({
   tag: 'app-profile',
   styleUrl: 'app-profile.css'
 })
 export class AppProfile {
-  @State() state = false;
   @Prop() name: string;
+
+  @State() state = false;
+
+  private formEl: HTMLSlFormElement;
+
+  componentDidLoad() {
+    this.formEl.addEventListener('sl-submit', (e: CustomEvent<{ formData: FormData; formControls: HTMLElement[] }>) =>
+      console.log('All fields are valid!', e.detail, serializeForm(e.detail.formData))
+    );
+  }
 
   formattedName(): string {
     if (this.name) {
@@ -36,7 +54,7 @@ export class AppProfile {
           <ion-label>Setting ({this.state.toString()})</ion-label>
           <ion-toggle checked={this.state} onIonChange={ev => (this.state = ev.detail.checked)} />
         </ion-item>
-        <sl-form class="input-validation-required">
+        <sl-form ref={el => (this.formEl = el)} class="input-validation-required">
           <sl-input name="name" label="Name" required></sl-input>
 
           <sl-select label="Favorite Animal" clearable required>
@@ -47,6 +65,11 @@ export class AppProfile {
           </sl-select>
 
           <sl-textarea name="comment" label="Comment" required></sl-textarea>
+
+          <ion-item>
+            <ion-label>Ionic input</ion-label>
+            <ion-input required />
+          </ion-item>
 
           <sl-checkbox required>Check me before submitting</sl-checkbox>
 
